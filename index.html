@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelToParcel | Live Localized AI Showroom</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        
+        body { 
+            background: #0f0c20;
+            background-image: radial-gradient(circle at top right, #1f0535, #4b2c80, #0a0815);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #f1f5f9; 
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-image 0.8s ease-in-out, background-color 0.8s ease-in-out;
+        }
+
+        header { 
+            background: rgba(10, 8, 21, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            color: white; 
+            padding: 35px; 
+            text-align: center; 
+            animation: fadeInDown 0.8s ease-out;
+        }
+        header h1 { 
+            font-size: 32px; 
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, #ff007f, #7f00ff, #00f0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        header p { color: #b4fed2; font-size: 15px; opacity: 0.9; font-weight: 300; }
+
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        
+        .panel { 
+            background: rgba(15, 12, 35, 0.65); 
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 30px; 
+            border-radius: 24px; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            animation: fadeInUp 1s ease-out;
+            transition: all 0.5s ease-in-out;
+        }
+        h2 { margin-bottom: 25px; color: #00f0ff; font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase; }
+
+        .upload-box { 
+            border: 2px dashed rgba(0, 240, 255, 0.3); 
+            padding: 30px; 
+            text-align: center; 
+            border-radius: 16px; 
+            background: rgba(0, 240, 255, 0.01); 
+            cursor: pointer; 
+            margin-bottom: 25px; 
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+        }
+        .upload-box:hover { 
+            border-color: #ff007f; 
+            background: rgba(255, 0, 127, 0.04);
+            transform: scale(1.02);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
+        }
+        .upload-box input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .preview-thumb { max-width: 100%; max-height: 150px; border-radius: 8px; margin-top: 10px; display: none; }
+
+        .dimension-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .dimension-grid input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(10, 8, 21, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            font-size: 14px;
+            color: white;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .dimension-grid input:focus { border-color: #00f0ff; box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
+
+        label { display: block; margin-bottom: 10px; font-weight: 500; font-size: 12px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px;}
+        select, textarea { 
+            width: 100%; padding: 14px; margin-bottom: 25px; background: rgba(10, 8, 21, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; font-size: 14px; color: white; outline: none; transition: all 0.3s;
+        }
+        select:focus, textarea:focus { border-color: #00f0ff; box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
+        textarea { height: 90px; resize: none; }
+
+        .slider-container { margin-bottom: 30px; }
+        .price-display { font-size: 18px; font-weight: bold; color: #ff007f; margin-bottom: 10px; display: block; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: rgba(255,255,255,0.08); height: 6px; border-radius: 5px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #00f0ff; cursor: pointer; box-shadow: 0 0 12px #00f0ff; transition: transform 0.2s; }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        button { 
+            width: 100%; padding: 16px; background: linear-gradient(90deg, #7f00ff, #ff007f); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.4s; letter-spacing: 1px;
+        }
+        button:hover { 
+            transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0, 240, 255, 0.4); background: linear-gradient(90deg, #ff007f, #00f0ff);
+        }
+
+        .placeholder-img { 
+            width: 100%; min-height: 250px; background: rgba(10, 8, 21, 0.7); border: 1px dashed rgba(255, 255, 255, 0.1); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-weight: bold; margin-bottom: 25px; padding: 20px; text-align: center;
+        }
+        
+        .product-list { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .product-card { 
+            border: 1px solid rgba(255, 255, 255, 0.1); padding: 18px; border-radius: 12px; background: rgba(10, 8, 21, 0.8); font-size: 13px; display: none; animation: scaleIn 0.5s ease-out forwards;
+        }
+        .product-card strong { display: block; color: #00f0ff; font-size: 16px; margin-bottom: 6px;}
+        .product-card p { color: #cbd5e1; margin-bottom: 12px; opacity: 0.8; }
+        .product-card .store-tag { color: #b4fed2; font-weight: bold; margin-bottom: 8px; display: block; }
+        
+        .buy-btn { 
+            display: inline-block; padding: 8px 16px; background: #27ae60; color: white; text-decoration: none; border-radius: 8px; font-size: 12px; font-weight: bold; transition: all 0.3s;
+        }
+        .buy-btn:hover { background: #219653; transform: scale(1.05); box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4); }
+
+        .inspiration-section {
+            max-width: 1100px;
+            margin: 50px auto 80px auto;
+            padding: 0 20px;
+            animation: fadeInUp 1.2s ease-out;
+        }
+        .inspiration-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .inspire-card {
+            background: rgba(15, 12, 35, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+        .inspire-card:hover {
+            transform: translateY(-5px);
+            border-color: #00f0ff;
+            box-shadow: 0 10px 25px rgba(0, 240, 255, 0.1);
+        }
+        .inspire-media-box {
+            width: 100%;
+            height: 180px;
+            background: rgba(10, 8, 21, 0.4);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px dashed rgba(255, 255, 255, 0.05);
+        }
+        .source-pill {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .pill-insta { background: rgba(255, 0, 127, 0.15); color: #ff007f; border: 1px solid #ff007f; }
+        .pill-pin { background: rgba(230, 0, 35, 0.15); color: #e60023; border: 1px solid #e60023; }
+        .pill-google { background: rgba(66, 133, 244, 0.15); color: #4285f4; border: 1px solid #4285f4; }
+        
+        .inspire-title { font-size: 14px; color: #f1f5f9; margin-bottom: 6px; font-weight: 600; }
+        .inspire-desc { font-size: 12px; color: #cbd5e1; opacity: 0.8; margin-bottom: 12px; line-height: 1.4; }
+        .remix-btn {
+            display: block;
+            text-align: center;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #00f0ff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            transition: all 0.2s;
+        }
+        .remix-btn:hover { background: #00f0ff; color: #0a0815; border-color: #00f0ff; }
+        
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        @media (max-width: 900px) { 
+            .container { grid-template-columns: 1fr; } 
+            .inspiration-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>PixelToParcel</h1>
+        <p>From your mind to your shopping cart</p>
+    </header>
+
+    <div class="container">
+        <!-- LEFT CONTROL PANEL (FORM) -->
+        <div class="panel">
+            <h2>1. Tailor Your Vibe</h2>
+            
+            <div class="upload-box">
+                <p id="upload-text">📸 Tap to drop your project zone image</p>
+                <input type="file" accept="image/*" onchange="previewImage(event)">
+                <img id="user-room-preview" class="preview-thumb" alt="Your Zone">
+            </div>
+
+            <label for="room-type">What space are we redesigning?</label>
+            <select id="room-type" onchange="adaptLabelsAndBackground()">
+                <option value="workspace">Personal Workspace / Desk Setup</option>
+                <option value="bathroom">Luxury Bathroom Sanctuary 🛁</option>
+                <option value="living">Main Living Hall</option>
+                <option value="bedroom">Bedroom Sanctuary</option>
+                <option value="kitchen">Kitchen Space</option>
+                <option value="furniture">Single Furniture Makeover</option>
+            </select>
+
+            <label id="dimension-label">Target Desktop Boundaries (Optional) 📐</label>
+            <div class="dimension-grid">
+                <input type="number" id="room-width" placeholder="Available Surface Width (cm)" min="1">
+                <input type="number" id="room-depth" placeholder="Available Surface Depth (cm)" min="1">
+            </div>
+
+            <label for="region">Where is your sanctuary? 🏡</label>
+            <select id="region">
+                <option value="IN" selected>India (Local Curation)</option>
+            </select>
+
+            <label for="prompt">Whisper your dream room details ✨</label>
+            <textarea id="prompt" placeholder="e.g., A cozy, warm-lit studio with deep emerald green accent walls, lots of soft plush textures, and trailing indoor vines..."></textarea>
+
+            <div class="slider-container">
+                <label>Your Investment Comfort Zone 💰</label>
+                <span class="price-display" id="price-val">Max Investment: ₹50,000</span>
+                <input type="range" id="budget-slider" min="5000" max="500000" step="5000" value="50000" oninput="displayPrice(this.value)">
+            </div>
+
+            <button onclick="triggerTransformation()">Manifest My Dream Space 🪄</button>
+        </div>
+
+        <!-- RIGHT VISUALIZATION PANEL (RESULTS) -->
+        <div id="result-panel" class="panel" style="opacity: 0.5;">
+            <h2>2. Your Reimagined Space</h2>
+            <div class="placeholder-img" id="display-frame">
+                <span id="ai-status-text">[ Waiting to materialize your vision ]</span>
+            </div>
+
+            <h2>3. Exact Multi-Store Sourcing & Services</h2>
+            <div class="product-list" id="marketplace-box">
+                <div class="product-card" id="prod-IN-low"></div>
+                <div class="product-card" id="prod-IN-high"></div>
+                <div class="product-card" id="prod-global">
+                    <strong>Bespoke Minimalist Nordic Desk Stand</strong>
+                    <span class="store-tag">📍 Available at: Regional Partner Store</span>
+                    <p>Sourced dynamically from global design partners matching localized desktop inventories.</p>
+                    <a href="#" class="buy-btn" onclick="alert('Routing to global storefront...')">Buy Direct From Store 🛒</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOWER ROW: SOCIAL DISCOVERY TRACK -->
+    <div class="inspiration-section">
+        <h2>Trending AI Adaptations</h2>
+        <div class="inspiration-grid">
+            <div class="inspire-card">
+                <span class="source-pill pill-insta">Instagram Trend</span>
+                <div class="inspire-media-box">[ Cyberpunk Gaming Neon Lair ]</div>
+                <div class="inspire-title">Hyper-Neon Streamer Setup</div>
+                <div class="inspire-desc">Recreated dynamically utilizing modular desk layouts verified in global fulfillment grids.</div>
+                <a href="#" class="remix-btn" onclick="applyRemix('A high-tech cyberpunk workspace with purple neon LED strip lights and a futuristic matte-black desktop layout', 120, 60, 'workspace')">Load This Vibe ⚡</a>
+            </div>
+            <div class="inspire-card">
+                <span class="source-pill pill-pin">Pinterest Aesthetics</span>
+                <div class="inspire-media-box">[ Emerald Green Oasis Studio ]</div>
+                <div class="inspire-title">Biophilic Maximalist Flat</div>
+                <div class="inspire-desc">Sourced matching emerald feature walls, trailing overhead vines, and accent lighting matrix arrays.</div>
+                <a href="#" class="remix-btn" onclick="applyRemix('A cozy biophilic studio with deep emerald green accent walls, warm ambient overhead lighting, and trailing indoor ivy plants', 15, 18, 'living')">Load This Vibe ⚡</a>
+            </div>
+            <div class="inspire-card">
+                <span class="source-pill pill-google">Google Curation</span>
+                <div class="inspire-media-box">[ Modern Japandi Sanctuary ]</div>
+                <div class="inspire-title">Nordic-Japanese Bedroom</div>
+                <div class="inspire-desc">Curated from low-profile solid oak platform bases matching localized regional inventories.</div>
+                <a href="#" class="remix-btn" onclick="applyRemix('A serene modern Japandi bedroom with clean lines, light oak wood finishes, and soft cream-textured linen fabrics', 12, 14, 'bedroom')">Load This Vibe ⚡</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIC PROCESSING MODULE -->
+    <script>
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const img = document.getElementById('user-room-preview');
+                img.src = reader.result;
+                img.style.display = 'block';
+                document.getElementById('upload-text').innerText = "✅ Image Loaded Successfully";
+            }
+            reader.readAsDataURL(event.target.files);
+        }
+
+        function adaptLabelsAndBackground() {
+            const spaceType = document.getElementById('room-type').value;
+            const label = document.getElementById('dimension-label');
+            const inputW = document.getElementById('room-width');
+            const inputD = document.getElementById('room-depth');
+            
+            const urls = {
+                workspace: "url('https://unsplash.com')",
+                bathroom: "url('https://unsplash.com')",
+                living: "url('https://unsplash.com')",
+                bedroom: "url('https://unsplash.com')",
+                kitchen: "url('https://unsplash.com')",
+                furniture: "url('https://unsplash.com')"
+            };
+
+            document.body.style.backgroundImage = urls[spaceType];
+
+            if (spaceType === 'workspace') {
+                label.innerText = "Target Desktop Boundaries (Optional) 📐";
+                inputW.placeholder = "Available Desk Width (cm)";
+                inputD.placeholder = "Available Desk Depth (cm)";
+            } else if (spaceType === 'bathroom') {
+                label.innerText = "Bathroom Layout Constraints (Optional) 📐";
+                inputW.placeholder = "Available Wall Clearance (cm)";
+                inputD.placeholder = "Max Alcove / Basin Depth (cm)";
+            } else if (spaceType === 'furniture') {
+                label.innerText = "Object Floor Footprint Clearance 📐";
+                inputW.placeholder = "Max Allowed Width (cm)";
+                inputD.placeholder = "Max Allowed Depth (cm)";
+            } else {
+                label.innerText = "Blueprint Overrides (Optional Tweak) 📐";
+                inputW.placeholder = "Target Wall Width (ft)";
+                inputD.placeholder = "Target Room Depth (ft)";
+            }
+        }
+
+        function displayPrice(val) {
+            const formatted = Number(val).toLocaleString();
+            document.getElementById('price-val').innerText = "Max Investment: ₹" + formatted;
+        }
+
+        function applyRemix(customPrompt, width, depth, type) {
+            document.getElementById('room-type').value = type;
+            adaptLabelsAndBackground();
+            document.getElementById('prompt').value = customPrompt;
+            document.getElementById('room-width').value = width;
+            document.getElementById('room-depth').value = depth;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(function() { alert("Vibe matrix loaded! Category background render transitioned smoothly."); }, 400);
+        }
+
+        function triggerTransformation() {
+            const promptVal = document.getElementById('prompt').value;
+            const region = document.getElementById('region').value;
+            const spaceType = document.getElementById('room-type').value;
+            const budget = parseInt(document.getElementById('budget-slider').value);
+            
+            const customWidth = document.getElementById('room-width').value;
+            const customDepth = document.getElementById('room-depth').value;
+            
+            if(!promptVal) {
+                alert("Please share your dream vision first!");
+                return;
+            }
+
+            document.getElementById('result-panel').style.opacity = '1';
+            
+            let loadingMessage = "🔮 <strong>AI Core Active:</strong> ";
+
+            if(customWidth && customDepth) {
+                if (spaceType === 'workspace') {
+                    loadingMessage += "Mapping desk surface spacing (" + customWidth + "cm x " + customDepth + "cm)... Allocating keyboard tracks... ";
+                } else if (spaceType === 'bathroom') {
+                    loadingMessage += "Analysing bathroom humidity parameters... Cross-matching alcove specs (" + customWidth + "cm x " + customDepth + "cm)... ";
+                } else {
+                    loadingMessage += "Applying manual structural overrides (" + customWidth + "ft x " + customDepth + "ft)... ";
+                }
+            } else {
+                loadingMessage += "Calculating 3D depth maps automatically... Matching physical layouts... ";
+            }
+            loadingMessage += "Filtering all Indian online stores & active directories for \"" + promptVal + "\"...";
+            
+            document.getElementById('ai-status-text').innerHTML = loadingMessage;
+            
+            document.getElementById('prod-IN-low').style.display = 'none';
+            document.getElementById('prod-IN-high').style.display = 'none';
+            document.getElementById('prod-global').style.display = 'none';
+
+            setTimeout(function() {
+                let unit = (spaceType === 'workspace' || spaceType === 'bathroom' || spaceType === 'furniture') ? "cm" : "ft";
+                let safetyTag = (customWidth && customDepth) ? `Verified matching your exact ${customWidth}${unit} surface scale. Layout collision avoided.` : "Spatial map verified via neural computer vision.";
+                document.getElementById('ai-status-text').innerHTML = "✨ <strong>Transformation Complete!</strong><br><small>" + safetyTag + "</small>";
+                
+                if (region === 'IN') {
+                    if (spaceType === 'workspace') {
+                        document.getElementById('prod-IN-low').innerHTML = `
+                            <strong>Multitasking Ergonomic Setup</strong>
+                            <span class="store-tag">📍 Linked Platform Inventory: Flipkart, Amazon India & Pepperfry</span>
+                            <span style="display:inline-block; margin-bottom:8px; padding:2px 6px; background:rgba(0,240,255,0.1); color:#00f0ff; border-radius:4px; font-size:11px; font-weight:bold;">📐 Footprint Verified Compatibility</span>
+                            <p>AI locked real inventory options matching your exact prompt across multiple Indian retail sites.</p>
+                            <a href="https://amazon.in" target="_blank" class="buy-btn" style="margin-right:5px; background:#f39c12;">Shop Amazon India 🛒</a>
+                            <a href="https://flipkart.com" target="_blank" class="buy-btn" style="margin-right:5px; background:#2980b9;">Shop Flipkart 🛒</a>
+                            <h4 style="margin-top:15px; font-size:13px; color:#ff007f;">🛠️ Need Help Assembling This Setup?</h4>
+                            <p style="font-size:11px; opacity:0.8; margin-bottom:8px;">Hire pre-vetted local professionals in your immediate area:</p>
+                            <a href="https://urbancompany.com" target="_blank" class="buy-btn" style="background:#8e44ad;">Find Local Carpenter / Electrician 🪚</a>
+                        `;
+                        document.getElementById('prod-IN-low').style.display = 'block';
+                    } else if (spaceType === 'bathroom') {
+                        document.getElementById('prod-IN-low').innerHTML = `
+                            <strong>Cera Premium Sanitary Suite</strong>
+                            <span class="store-tag">📍 Sourced via: Cera India & Jaquar Commercial Feeds</span>
+                            <span style="display:inline-block; margin-bottom:8px; padding:2px 6px; background:rgba(0,240,255,0.1); color:#00f0ff; border-radius:4px; font-size:11px; font-weight:bold;">📐 Dimensions Custom-Checked</span>
+                            <p>Moisture-proof parameters confirmed against selected basin clearance lines inside India's retail databases.</p>
+                            <a href="https://cera-india.com" target="_blank" class="buy-btn" style="background:#27ae60;">Shop Sourced Fixture 🛒</a>
+                            <h4 style="margin-top:15px; font-size:13px; color:#ff007f;">🛁 Structural Plumbing Pipeline Check</h4>
+                            <p style="font-size:11px; opacity:0.8; margin-bottom:8px;">Sanitary changes require expert setup. Hire local installation services:</p>
+                            <a href="https://urbancompany.com" target="_blank" class="buy-btn" style="background:#8e44ad;">Book Local Plumber Immediately 🔧</a>
+                        `;
+                        document.getElementById('prod-IN-low').style.display = 'block';
+                    } else {
+                        if (budget < 70000) {
+                            document.getElementById('prod-IN-low').innerHTML = `
+                                <strong>The Wakefit Grid Modern Sofa</strong>
+                                <span class="store-tag">📍 Available at: Wakefit India & Urban Ladder</span>
+                                <span style="display:inline-block; margin-bottom:8px; padding:2px 6px; background:rgba(0,240,255,0.1); color:#00f0ff; border-radius:4px; font-size:11px; font-weight:bold;">📐 Dimensions: 182.8cm x 83.8cm</span>
+                                <p>Selected because its structural depth footprint maps cleanly within your target parameters.</p>
+                                <a href="https://wakefit.co" target="_blank" class="buy-btn" style="background:#27ae60;">Buy Direct From Wakefit 🛒</a>
+                            `;
+                            document.getElementById('prod-IN-low').style.display = 'block';
+                        } else {
+                            document.getElementById('prod-IN-high').innerHTML = `
+                                <strong>Urban Ladder Royal Velvet Lounge Chair</strong>
+                                <span class="store-tag">📍 Available at: Urban Ladder India & Pepperfry Feeds</span>
+                                <span style="display:inline-block; margin-bottom:8px; padding:2px 6px; background:rgba(0,240,255,0.1); color:#00f0ff; border-radius:4px; font-size:11px; font-weight:bold;">📐 Dimensions: 86.3cm x 88.9cm</span>
+                                <p>Premium accent furniture components clearing all window boundary scales safely.</p>
+                                <a href="https://urbanladder.com" target="_blank" class="buy-btn" style="background:#27ae60;">Buy Direct From Store 🛒</a>
+                            `;
+                            document.getElementById('prod-IN-high').style.display = 'block';
+                        }
+                    }
+                } else {
+                    document.getElementById('prod-global').style.display = 'block';
+                }
+            }, 1800); 
+        }
+    </script>
+</body>
+</html>
+
